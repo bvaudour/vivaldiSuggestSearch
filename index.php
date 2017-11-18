@@ -1,5 +1,77 @@
 <?php
 
+// Parameters
+$types = [
+	'qwant'    => [
+		'request'   => function($q) {
+			return getJson('https://api.qwant.com/api/suggest?q=%s&lang=fr_fr', $q);
+		},
+		'transform' => function(array $input) {
+			$output = [];
+			if (isset($input['data'])) {
+				$elt = $input['data'];
+				if (isset($elt['items'])) {
+					$elt = $elt['items'];
+					foreach ($elt as $e) {
+						if (isset($e['value'])) {
+							$output[] = $e['value'];
+						}
+					}
+				}
+			}
+			return $output;
+		},
+	],
+	'allocine' => [
+		'request'   => function($q) {
+			return getJson('http://essearch.allocine.net/fr/autocomplete?geo2=83085&q=%s', $q);
+		},
+		'transform' => function(array $input) {
+			$output = [];
+			foreach ($input as $e) {
+				if (isset($e['title1'])) {
+					$output[] = $e['title1'];
+				} else if (isset($e['title2'])) {
+					$output[] = $e['title2'];
+				}
+			}
+			return $output;
+		},
+	],
+	'imdb'     => [
+		'request'   => function($q) {
+			$q   = mb_strtolower($q);
+			$url = 'https://v2.sg.media-imdb.com/suggests/'.substr($q, 0, 1).'/%s.json';
+			$raw = file_get_contents(sprintf($url, $q));
+			$raw = substr($raw, strlen($q)+6);
+			$raw = substr($raw, 0, strlen($raw)-1);
+			return json_decode($raw, true);
+		},
+		'transform' => function(array $input) {
+			$output = [];
+			if (isset($input['d'])) {
+				$elt = $input['d'];
+				foreach ($elt as $e) {
+					if (isset($e['l'])) {
+						$output[] = $e['l'];
+					}
+				}
+			}
+			return $output;
+		},
+	],
+];
+
+// Declare default type here
+$default = 'qwant';
+
+// DO NOT MODIFY BELOW!!!!
+function getJson($url, $q) {
+	$url = sprintf($url, $q);
+	$raw = file_get_contents($url);
+	return json_decode($raw, true);
+}
+
 // To test the script on command line
 // Usage: php -f /path_to_youscriptname.php t=<type> q=<word_to_complete>
 foreach($argv as $arg) {
@@ -9,66 +81,17 @@ foreach($argv as $arg) {
 	}
 }
 
-// Declare your search engine (<type>) here, with the official autosuggest URL of the search engine
-$types = [
-	'qwant'    => 'https://api.qwant.com/api/suggest?q=%s&lang=fr_fr',
-	'allocine' => 'http://essearch.allocine.net/fr/autocomplete?geo2=83085&q=%s',
-];
-
-// Declare your default type here
-$default = 'qwant';
-
-// Declare your function transformation here
-// function takes thes input as array representation of the request and should return an array of the need suggestions
-function transformQwant(array $input) {
-	$output = [];
-	if (isset($input['data'])) {
-		$elt = $input['data'];
-		if (isset($elt['items'])) {
-			$elt = $elt['items'];
-			foreach ($elt as $e) {
-				if (isset($e['value'])) {
-					$output[] = $e['value'];
-				}
-			}
-		}
-	}
-	return $output;
-}
-
-function transformAllocine(array $input) {
-	$output = [];
-	foreach ($input as $e) {
-		if (isset($e['title1'])) {
-			$output[] = $e['title1'];
-		} else if (isset($e['title2'])) {
-			$output[] = $e['title2'];
-		}
-	}
-	return $output;
-}
-
 // Preparation of the variables
 $t = (isset($_GET['t'])) ? $_GET['t'] : $default;
 if (!isset($types[$t])) $t = $default;
 $q = (isset($_GET['q'])) ? $_GET['q'] : '';
-$url = sprintf($types[$t], $q);
 
-// Get the needed data to prepare the autosuggestion
-$raw  = file_get_contents($url);
-$json = json_decode($raw, true);
+// Execute the request
+$input = $types[$t]['request']($q);
 
-// Apply transform functions to make the suggestions Vivaldi-compliant
-$results = [$q];
-switch ($t) {
-	case 'qwant':
-		$results[] = transformQwant($json);
-		break;
-	case 'allocine':
-		$results[] = transformAllocine($json);
-		break;
-}
+// Extract wanted suggestions
+$output = $types[$t]['transform']($input);
 
-// Return the formatted output
+// Return the response
 header('Content-Type: application/json');
-echo json_encode($results);
+echo json_encode([$q, $output]);

@@ -63,8 +63,9 @@ replacing `{type}` by the name of your search engine:
 
 ### Add suggestion
 
-To add a new search suggestion, you’ll need to modify 3 parts of the index.php:
+To add a new search suggestion, you’ll need to add an entry to the array $type of the index.php with the following content:
 
-1. add a type name and the official API suggestion URL on the array $types
-2. create a transformation function which takes the official requested json and returns an array of the wanted suggestions
-3. add a case for applying this function to your created type
+* key: type’s name
+* value: an array with 2 functions:
+   - a 'request' function using a string parameter (corresponding to the keyword of the search) and returning the raw results as an array,
+   - a 'transform' function using the returned array of the request as parameter, and returning the array of the wanted suggestions.
