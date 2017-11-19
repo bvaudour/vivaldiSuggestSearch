@@ -60,6 +60,8 @@ replacing `{type}` by the name of your search engine:
 
 * For Qwant: qwant
 * For Allocine: allocine
+* For Imdb: imdb
+* For Ecosia: ecosia
 
 ### Add suggestion
 

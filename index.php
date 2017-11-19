@@ -38,6 +38,17 @@ $types = [
 			return $output;
 		},
 	],
+	'ecosia'   => [
+		'request'   => function($q) {
+			return getJson("https://ac.ecosia.org/autocomplete?q=%s&mkt=fr-fr", $q);
+		},
+		'transform' => function(array $input) {
+			if (isset($input['suggestions'])) {
+				return $input['suggestions'];
+			}
+			return [];
+		},
+	],
 	'imdb'     => [
 		'request'   => function($q) {
 			$q   = mb_strtolower($q);
