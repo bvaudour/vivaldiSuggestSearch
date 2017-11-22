@@ -54,9 +54,9 @@ server {
 
 Put the following line as suggestion URL on you Vivaldi search engine configuration:
 
-`http://suggest.loc/?t={type}&q=%s`
+`http://suggest.loc/?t={type}&l={locale}&q=%s`
 
-replacing `{type}` by the name of your search engine. Supported types:
+replacing `{type}` by the name of your search engine and `{locale}` by your wanted locale. Supported types:
 
 * [allocine](http://www.allocine.fr/)
 * [ecosia](https://www.ecosia.org/)
@@ -64,11 +64,13 @@ replacing `{type}` by the name of your search engine. Supported types:
 * [qwant](https://www.qwant.com/)
 * [swisscow](https://swisscows.ch/)
 
+Locale should be on the form `ll_CC` where `ll` is the language code and `CC` the country code (could be more than 2 characters).
+
 ### Add suggestion
 
-To add a new search suggestion, you’ll need to add an entry to the array $type of the index.php with the following content:
+To add a new search suggestion, you’ll need to add an entry to the array $suggestion of the index.php with the following content:
 
 * key: type’s name
 * value: an array with 2 functions:
-   - a 'request' function using a string parameter (corresponding to the keyword of the search) and returning the raw results as an array,
+   - a 'request' function using 2 string parameters (the search’s keyword and the locale) and returning the raw suggestions’ results as an array,
    - a 'transform' function using the returned array of the request as parameter, and returning the array of the wanted suggestions.
