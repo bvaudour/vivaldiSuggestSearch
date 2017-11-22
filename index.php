@@ -71,6 +71,14 @@ $types = [
 			return $output;
 		},
 	],
+	'swisscow' => [
+		'request'   => function($q) {
+			return getJson("https://suggest.hulbee.com/suggest?culture=fr-FR&bucket=Web&query=%s", $q);
+		},
+		'transform' => function(array $input) {
+			return $input;
+		},
+	],
 ];
 
 // Declare default type here

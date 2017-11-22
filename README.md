@@ -56,12 +56,13 @@ Put the following line as suggestion URL on you Vivaldi search engine configurat
 
 `http://suggest.loc/?t={type}&q=%s`
 
-replacing `{type}` by the name of your search engine:
+replacing `{type}` by the name of your search engine. Supported types:
 
-* For Qwant: qwant
-* For Allocine: allocine
-* For Imdb: imdb
-* For Ecosia: ecosia
+* [allocine](http://www.allocine.fr/)
+* [ecosia](https://www.ecosia.org/)
+* [imdb](http://www.imdb.com/)
+* [qwant](https://www.qwant.com/)
+* [swisscow](https://swisscows.ch/)
 
 ### Add suggestion
 
